@@ -51,12 +51,16 @@ fi
 
 # --- 3. Configure Docker to respect UFW --------------------------------------
 log "Configuring Docker daemon (disable iptables)..."
-sudo tee /etc/docker/daemon.json > /dev/null <<EOF
+if [ ! -f /etc/docker/daemon.json ] || ! grep -q '"iptables": false' /etc/docker/daemon.json; then
+    sudo tee /etc/docker/daemon.json > /dev/null <<EOF
 {
   "iptables": false
 }
 EOF
-sudo systemctl restart docker
+    sudo systemctl restart docker
+else
+    info "Docker daemon already configured, skipping."
+fi
 
 # --- 4. UFW ------------------------------------------------------------------
 log "Configuring UFW..."
@@ -89,9 +93,10 @@ sudo systemctl enable update-dns.service
 log "Updating Cloudflare DNS with current public IP..."
 bash /opt/vpn/scripts/update-dns.sh
 
-# --- 7. Write temporary HTTP-only nginx.conf for cert bootstrap --------------
-log "Writing temporary HTTP-only nginx.conf for certificate bootstrap..."
-cat > "$REPO_DIR/nginx.conf" <<EOF
+# --- 7–9. Bootstrap cert (skipped if cert already exists) --------------------
+if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
+    log "Writing temporary HTTP-only nginx.conf for certificate bootstrap..."
+    cat > "$REPO_DIR/nginx.conf" <<EOF
 events {}
 
 http {
@@ -110,21 +115,22 @@ http {
 }
 EOF
 
-# --- 8. Start nginx and wg-easy (HTTP only) ----------------------------------
-log "Starting nginx and wg-easy..."
-cd "$REPO_DIR"
-docker compose up -d nginx wg-easy
+    log "Starting nginx and wg-easy..."
+    cd "$REPO_DIR"
+    docker compose up -d nginx wg-easy
 
-log "Waiting for nginx to be ready..."
-sleep 5
+    log "Waiting for nginx to be ready..."
+    sleep 5
 
-# --- 9. Issue Let's Encrypt certificate --------------------------------------
-log "Issuing Let's Encrypt certificate for $DOMAIN..."
-docker compose run --rm certbot certbot certonly \
-    --webroot -w /var/www/certbot \
-    -d "$DOMAIN" \
-    --email "$EMAIL" \
-    --agree-tos --no-eff-email
+    log "Issuing Let's Encrypt certificate for $DOMAIN..."
+    docker compose run --rm certbot certbot certonly \
+        --webroot -w /var/www/certbot \
+        -d "$DOMAIN" \
+        --email "$EMAIL" \
+        --agree-tos --no-eff-email
+else
+    info "Certificate already exists, skipping bootstrap."
+fi
 
 # --- 10. Restore full nginx.conf with HTTPS ----------------------------------
 log "Restoring full nginx.conf with HTTPS..."
