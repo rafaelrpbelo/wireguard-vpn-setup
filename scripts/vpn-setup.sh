@@ -59,7 +59,7 @@ sudo ufw allow 51820/udp
 sudo ufw --force enable
 sudo ufw reload
 
-# --- 5. Install update-dns script and systemd service ------------------------
+# --- 4. Install update-dns script and systemd service ------------------------
 log "Installing update-dns script and systemd service..."
 
 sudo chmod +x "$REPO_DIR/scripts/update-dns.sh"
@@ -68,11 +68,11 @@ sudo cp "$REPO_DIR/scripts/update-dns.service" /etc/systemd/system/update-dns.se
 sudo systemctl daemon-reload
 sudo systemctl enable update-dns.service
 
-# --- 6. Update Cloudflare DNS with current IP --------------------------------
+# --- 5. Update Cloudflare DNS with current IP --------------------------------
 log "Updating Cloudflare DNS with current public IP..."
 bash /opt/vpn/scripts/update-dns.sh
 
-# --- 7–9. Bootstrap cert (skipped if cert already exists) --------------------
+# --- 6–8. Bootstrap cert (skipped if cert already exists) --------------------
 if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
     log "Writing temporary HTTP-only nginx.conf for certificate bootstrap..."
     cat > "$REPO_DIR/nginx.conf" <<EOF
@@ -111,7 +111,7 @@ else
     info "Certificate already exists, skipping bootstrap."
 fi
 
-# --- 10. Restore full nginx.conf with HTTPS ----------------------------------
+# --- 9. Restore full nginx.conf with HTTPS ----------------------------------
 log "Restoring full nginx.conf with HTTPS..."
 cat > "$REPO_DIR/nginx.conf" <<EOF
 events {}
@@ -151,7 +151,7 @@ http {
 }
 EOF
 
-# --- 11. Start all containers ------------------------------------------------
+# --- 10. Start all containers ------------------------------------------------
 log "Starting all containers..."
 docker compose up -d
 

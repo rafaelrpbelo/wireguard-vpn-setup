@@ -82,12 +82,11 @@ bash /opt/vpn/scripts/vpn-setup.sh
 This will:
 1. Update system packages
 2. Install Docker
-3. Configure Docker to respect UFW
-4. Set up UFW firewall rules
-5. Install and enable the DNS update systemd service
-6. Update Cloudflare DNS with the current public IP
-7. Bootstrap the Let's Encrypt certificate
-8. Start all containers
+3. Set up UFW firewall rules
+4. Install and enable the DNS update systemd service
+5. Update Cloudflare DNS with the current public IP
+6. Bootstrap the Let's Encrypt certificate
+7. Start all containers
 
 ---
 
