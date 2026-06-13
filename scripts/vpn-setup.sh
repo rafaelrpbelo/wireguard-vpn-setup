@@ -75,7 +75,7 @@ bash /opt/vpn/scripts/update-dns.sh
 # --- 6–8. Bootstrap cert (skipped if cert already exists) --------------------
 if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
     log "Writing temporary HTTP-only nginx.conf for certificate bootstrap..."
-    cat > "$REPO_DIR/nginx.conf" <<EOF
+    sudo tee "$REPO_DIR/nginx.conf" > /dev/null <<EOF
 events {}
 
 http {
@@ -96,13 +96,13 @@ EOF
 
     log "Starting nginx and wg-easy..."
     cd "$REPO_DIR"
-    docker compose up -d nginx wg-easy
+    sudo docker compose up -d nginx wg-easy
 
     log "Waiting for nginx to be ready..."
     sleep 5
 
     log "Issuing Let's Encrypt certificate for $DOMAIN..."
-    docker compose run --rm --entrypoint certbot certbot certonly \
+    sudo docker compose run --rm --entrypoint certbot certbot certonly \
         --webroot -w /var/www/certbot \
         -d "$DOMAIN" \
         --email "$EMAIL" \
@@ -113,7 +113,7 @@ fi
 
 # --- 9. Restore full nginx.conf with HTTPS ----------------------------------
 log "Restoring full nginx.conf with HTTPS..."
-cat > "$REPO_DIR/nginx.conf" <<EOF
+sudo tee "$REPO_DIR/nginx.conf" > /dev/null <<EOF
 events {}
 
 http {
@@ -153,7 +153,7 @@ EOF
 
 # --- 10. Start all containers ------------------------------------------------
 log "Starting all containers..."
-docker compose up -d
+sudo docker compose up -d
 
 # --- Done --------------------------------------------------------------------
 echo ""
