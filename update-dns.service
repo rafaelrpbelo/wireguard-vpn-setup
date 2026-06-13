@@ -1,0 +1,12 @@
+[Unit]
+Description=Update Cloudflare DNS on boot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/opt/vpn/.env
+ExecStart=/opt/vpn/scripts/update-dns.sh
+
+[Install]
+WantedBy=multi-user.target
