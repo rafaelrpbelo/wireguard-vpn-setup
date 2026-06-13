@@ -70,7 +70,7 @@ sudo systemctl enable update-dns.service
 
 # --- 5. Update Cloudflare DNS with current IP --------------------------------
 log "Updating Cloudflare DNS with current public IP..."
-bash /opt/vpn/scripts/update-dns.sh
+sudo bash /opt/vpn/scripts/update-dns.sh
 
 # --- 6–8. Bootstrap cert (skipped if cert already exists) --------------------
 if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then

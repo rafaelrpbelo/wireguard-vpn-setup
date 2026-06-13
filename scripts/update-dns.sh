@@ -13,7 +13,7 @@ curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/dns_recor
   -H "Content-Type: application/json" \
   --data "{\"type\":\"A\",\"name\":\"$DOMAIN\",\"content\":\"$IP\",\"ttl\":60,\"proxied\":false}"
 
-echo "$(date): Updated $DOMAIN to $IP" >> /var/log/update-dns.log
+echo "$(date): Updated $DOMAIN to $IP" | sudo tee -a /var/log/update-dns.log > /dev/null
 
 # Renew cert if within 30 days of expiry
 certbot renew --quiet 2>/dev/null || true
