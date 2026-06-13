@@ -79,8 +79,7 @@ sudo ufw reload
 # --- 5. Install update-dns script and systemd service ------------------------
 log "Installing update-dns script and systemd service..."
 
-sudo cp "$REPO_DIR/scripts/update-dns.sh" /opt/vpn/scripts/update-dns.sh
-sudo chmod +x /opt/vpn/scripts/update-dns.sh
+sudo chmod +x "$REPO_DIR/scripts/update-dns.sh"
 
 sudo cp "$REPO_DIR/scripts/update-dns.service" /etc/systemd/system/update-dns.service
 sudo systemctl daemon-reload
