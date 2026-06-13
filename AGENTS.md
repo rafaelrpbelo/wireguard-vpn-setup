@@ -38,8 +38,7 @@ or a lapsed SSL certificate. Take extra care.
 - **Never hardcode secrets.** All sensitive values (API tokens, zone IDs, domain names) must come from `.env`.
 - **Never expose port `51821` to the host** in `docker-compose.yml`. The wg-easy UI must only be accessible through nginx on port 443.
 - **Never proxy the Cloudflare DNS record.** The orange cloud (proxied) mode blocks WireGuard traffic. The A record must always be grey cloud (DNS only).
-- **Never remove the NAT MASQUERADE rule** from `/etc/ufw/before.rules`. Without it, Docker containers cannot reach the internet.
-- **Never set `"iptables": true`** in `/etc/docker/daemon.json`. Docker would bypass UFW and expose container ports publicly.
+- **Never add a `ports:` mapping for `51821`** in `docker-compose.yml`. The wg-easy UI must only be accessible through nginx on port 443. Docker's iptables management is relied upon to keep unexposed ports closed.
 
 ---
 
@@ -57,8 +56,7 @@ Do not commit the HTTP-only version — it is intentionally temporary.
 
 ### Docker network IPs are fixed
 `wg-easy` is pinned to `10.42.42.42` on the internal Docker network.
-The UFW MASQUERADE rule covers `172.16.0.0/12` which includes the Docker bridge subnet `172.17.0.0/16`.
-If you change the network config, verify both the container IPs and the MASQUERADE subnet still align.
+If you change the network config, verify container IPs and that no internal-only ports gain a `ports:` mapping.
 
 ### Port 51820 is UDP
 WireGuard traffic runs on `51820/udp`. Do not change it to TCP — WireGuard is UDP only.
@@ -94,7 +92,7 @@ WireGuard traffic runs on `51820/udp`. Do not change it to TCP — WireGuard is 
 | nginx won't start | Check `docker logs nginx` — likely a bad `nginx.conf`. Restore last working version and restart. |
 | SSL cert missing | Re-run the certbot bootstrap step from `vpn-setup.sh` manually |
 | DNS not updating | Check `systemctl status update-dns.service` and `cat /var/log/update-dns.log` |
-| Port 51821 exposed | Verify `daemon.json` has `"iptables": false` and restart Docker + reload UFW |
+| Port 51821 exposed | Verify no `ports:` mapping for `51821` exists in `docker-compose.yml` and restart Docker |
 | Lost SSH access | Use your hosting provider's emergency console or out-of-band access as a fallback |
 
 ---

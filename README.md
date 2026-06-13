@@ -125,9 +125,7 @@ Client → vpn.yourdomain.com:51820/udp → WireGuard
 Port `51821` is never exposed to the host — only nginx can reach wg-easy internally via the Docker network.
 
 ### Docker + UFW
-Docker bypasses UFW by default. This is fixed by:
-- Setting `"iptables": false` in `/etc/docker/daemon.json`
-- Adding a NAT MASQUERADE rule in `/etc/ufw/before.rules` so containers can still reach the internet
+Docker manages its own iptables rules. Port `51821` is not exposed in `docker-compose.yml` so Docker never opens it — UFW is used only to allowlist the ports that should be public (22, 80, 443, 51820/udp).
 
 ---
 
@@ -148,6 +146,5 @@ Docker bypasses UFW by default. This is fixed by:
 - Check logs: `docker logs nginx` / `docker logs wg-easy`
 
 **Port 51821 still accessible:**
-- Verify Docker daemon config: `cat /etc/docker/daemon.json`
+- Verify there is no `ports:` mapping for `51821` in `docker-compose.yml`
 - Check UFW rules: `sudo ufw status`
-- Restart Docker: `sudo systemctl restart docker && sudo ufw reload`

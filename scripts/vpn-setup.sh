@@ -49,29 +49,8 @@ else
     info "Docker already installed, skipping."
 fi
 
-# --- 3. Configure Docker to respect UFW --------------------------------------
-log "Configuring Docker daemon (disable iptables)..."
-if [ ! -f /etc/docker/daemon.json ] || ! grep -q '"iptables": false' /etc/docker/daemon.json; then
-    sudo tee /etc/docker/daemon.json > /dev/null <<EOF
-{
-  "iptables": false
-}
-EOF
-    sudo systemctl restart docker
-else
-    info "Docker daemon already configured, skipping."
-fi
-
-# --- 4. UFW ------------------------------------------------------------------
+# --- 3. UFW ------------------------------------------------------------------
 log "Configuring UFW..."
-
-UFW_BEFORE=/etc/ufw/before.rules
-if ! grep -q "MASQUERADE" "$UFW_BEFORE"; then
-    info "Adding NAT MASQUERADE rules to $UFW_BEFORE..."
-    sudo sed -i '1s|^|# Allow Docker containers (172.16.0.0/12) to reach the internet through eth0.\n# Required because Docker bypasses UFW by default (iptables: false in daemon.json).\n# MASQUERADE rewrites container source IPs to the instance'"'"'s public IP on outbound traffic.\n*nat\n:POSTROUTING ACCEPT [0:0]\n-A POSTROUTING -s 172.16.0.0/12 -o eth0 -j MASQUERADE\nCOMMIT\n\n|' "$UFW_BEFORE"
-else
-    info "MASQUERADE rule already exists, skipping."
-fi
 
 sudo ufw allow 22/tcp
 sudo ufw allow 80/tcp
@@ -123,7 +102,7 @@ EOF
     sleep 5
 
     log "Issuing Let's Encrypt certificate for $DOMAIN..."
-    docker compose run --rm certbot certbot certonly \
+    docker compose run --rm --entrypoint certbot certbot certonly \
         --webroot -w /var/www/certbot \
         -d "$DOMAIN" \
         --email "$EMAIL" \
