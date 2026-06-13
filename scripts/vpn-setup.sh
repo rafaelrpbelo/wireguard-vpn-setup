@@ -154,6 +154,7 @@ EOF
 # --- 10. Start all containers ------------------------------------------------
 log "Starting all containers..."
 sudo docker compose up -d
+sudo docker compose restart nginx
 
 # --- Done --------------------------------------------------------------------
 echo ""
