@@ -41,7 +41,7 @@ vpn/
 ### 1. Clone the repo
 
 ```bash
-git clone <your_repo_url> /opt/vpn
+git clone https://github.com/rafaelrpbelo/wireguard-vpn-setup.git /opt/vpn
 ```
 
 ### 2. Create and fill in `.env`
