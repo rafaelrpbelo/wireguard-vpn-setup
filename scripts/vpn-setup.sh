@@ -19,6 +19,8 @@ log()  { echo -e "\n\033[1;32m>>> $1\033[0m"; }
 err()  { echo -e "\n\033[1;31m[ERROR] $1\033[0m"; exit 1; }
 info() { echo -e "    $1"; }
 
+source "$REPO_DIR/scripts/notify.sh"
+
 # --- 0. Validate .env exists and is filled in --------------------------------
 log "Checking .env..."
 
@@ -163,3 +165,5 @@ echo " Setup complete!"
 echo " wg-easy UI : https://$DOMAIN"
 echo " WireGuard  : $DOMAIN:51820"
 echo "=============================================="
+
+notify "VPN Ready" "Setup complete! Connect at $DOMAIN:51820"
